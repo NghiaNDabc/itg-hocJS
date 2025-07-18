@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    
+    <script>
+        var arr = [10, 20, 3, 5, 6, 19, 17, 60, 101];
+        const n =  arr.length;
+        let div1 = document.createElement("div");
+        div1.innerHTML="Mảng ban đầu: "+arr;
+        document.body.appendChild(div1);
+        function sapxep(arr){
+            const nn =  arr.length;
+            for(let i=0; i<nn - 1; i++ )
+            {
+                for(let j = i+i; j < nn; j++)
+                {
+                    if(arr[i] > arr[j])
+                    {
+                        let tmp = arr[i];
+                        arr[i] = arr[j];
+                        arr[j] = tmp;
+                    }
+                }
+            }
+        }
+
+        function printArr(arr)
+        {
+            arr.forEach(element => {
+               console.log(element) 
+            });
+        }
+
+        sapxep(arr);
+        
+        let div2 = document.createElement("div");
+        div2.innerHTML = "Mảng sau khi sắp xếp " + arr;
+        document.body.appendChild(div2);
+
+        let sntNhoNhat = 0;
+
+        function isPrime(x){
+            if(x < 2) return false;
+            let canBac2 = Math.sqrt(x);
+            for(let i = 2; i < canBac2; i++){
+                if(x % i == 0) return false;
+            }
+            return true;
+        }
+        function timSoNguyenToNhoNhat(arr){
+            let r = 0;
+            arr.forEach(e =>{
+                if(isPrime(e))
+                    if(r < r || r == 0)
+                        r = 0;
+            });
+            return r;
+        }
+
+        let sntNN = timSoNguyenToNhoNhat(arr);
+
+        let rs2="";
+        if(sntNN == 0)
+            rs2="Không có số nguyên tố";
+        else
+            rs2="Số nguyên tố nhỏ nhất là "+ sntNN;
+
+        let div3 = document.createElement("div");
+        div3.innerHTML = rs2;
+        document.body.appendChild(div3);
+
+        function gtln(arr){
+            let max = arr[0];
+            for(let i = 1; i < n; i++){
+                if(max < arr[i])
+                    max = arr[i]
+            }
+            let div4 = document.createElement("div");
+            div4.innerHTML="Giá trị lớn nhất: "+ max;
+            document.body.appendChild(div4);
+        }
+        function gtnn(arr, mes){
+            let min = arr[0];
+            for(let i = 1; i < arr.length; i++){
+                if(min > arr[i])
+                    min = arr[i]
+            }
+            let div4 = document.createElement("div");
+            div4.innerHTML=mes+": "+ min;
+            document.body.appendChild(div4);
+        }
+        gtln(arr);
+
+        function chanLe(arr){
+            let chan=[];
+            let le = [];
+            arr.forEach(e =>{
+                if(e % 2 ==0)
+                    chan.push(e)
+                else
+                    le.push(e)
+            });
+            let div5 = document.createElement("div");
+            div5.innerHTML="Mảng chẵn "+chan;
+            let div6 = document.createElement("div");
+            div6.innerHTML="Mảng lẻ "+le;
+
+            document.body.appendChild(div5);
+            document.body.appendChild(div6);
+            gtnn(chan, "Giá trị chẵn nhỏ nhất");
+            gtnn(le, "Giá trị lẻ nhỏ nhất");
+            sapxep(le);
+            sapxep(chan);
+            let div7 = document.createElement("div");
+            div7.innerHTML="Mảng chẵn sắp xếp "+chan;
+            let div8 = document.createElement("div");
+            div8.innerHTML="Mảng lẻ sắp xếp "+le;
+            document.body.appendChild(div7);
+            document.body.appendChild(div8);
+        }
+        chanLe(arr);
+    </script>
+</body>
+</html>
