@@ -1,0 +1,227 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html ng-app="InternApp">
+<head>
+  <meta charset="utf-8">
+  <title>Quản lý thực tập sinh</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <style>
+    td.truncate {
+      max-width: 150px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    td.truncate:hover {
+      overflow: visible;
+      white-space: normal;
+      background: #fff;
+    }
+  </style>
+</head>
+<body ng-controller="InternController as ctrl">
+  <div class="container">
+    <h3>Quản lý thông tin thực tập sinh</h3>
+
+    <div class="btn-toolbar" style="margin-bottom: 10px;">
+      <button class="btn btn-default" ng-click="ctrl.refresh()"><span class="glyphicon glyphicon-refresh"></span></button>
+      <button class="btn btn-primary" ng-click="ctrl.addNew()"><span class="glyphicon glyphicon-plus"></span></button>
+      <button class="btn btn-warning" ng-click="ctrl.editSelected()" ng-disabled="!ctrl.selected"><span class="glyphicon glyphicon-edit"></span></button>
+      <button class="btn btn-danger" ng-click="ctrl.confirmDelete()" ng-disabled="!ctrl.selected"><span class="glyphicon glyphicon-trash"></span></button>
+    </div>
+
+    <div class="input-group" style="margin-bottom: 10px;">
+      <input type="text" class="form-control" placeholder="Nhập từ khóa tìm kiếm" ng-model="ctrl.searchText" ng-keypress="ctrl.checkEnter($event)">
+      <span class="input-group-btn">
+        <button class="btn btn-default" ng-click="ctrl.search()"><span class="glyphicon glyphicon-search"></span></button>
+      </span>
+    </div>
+
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Hành động</th>
+          <th>Bộ phận</th>
+          <th>Chuyên môn</th>
+          <th>Thời gian tt</th>
+          <th>Họ và tên</th>
+          <th>Ngày sinh</th>
+          <th>Sđt</th>
+          <th>Email</th>
+          <th>Điểm tl</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="nv in ctrl.filteredList track by $index" ng-click="ctrl.selectRow(nv)" ng-class="{ 'info': ctrl.selected === nv }">
+          <td>{{$index + 1}}</td>
+          <td><span class="glyphicon glyphicon-trash text-danger" ng-click="ctrl.confirmDelete(nv)"></span></td>
+          <td>{{nv.bo_phan}}</td>
+          <td class="truncate" title="{{nv.chuyen_mon}}">{{nv.chuyen_mon}}</td>
+          <td>{{nv.tg_bat_dau | date:'dd/MM/yyyy'}} - {{nv.tg_ket_thuc | date:'dd/MM/yyyy'}}</td>
+          <td class="truncate" title="{{nv.ho_ten}}">{{nv.ho_ten}}</td>
+          <td>{{nv.ngay_sinh | date:'dd/MM/yyyy'}}</td>
+          <td>{{nv.sdt | tel}}</td>
+          <td>{{nv.email}}</td>
+          <td>{{nv.diem | number:2}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal fade" id="formModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">{{ctrl.isEdit ? 'Cập nhật thông tin' : 'Thêm thông tin nhân viên'}}</h4>
+        </div>
+        <div class="modal-body">
+          <form name="internForm">
+            <div class="form-group">
+              <label>Bộ phận</label>
+              <select class="form-control" ng-model="ctrl.form.bo_phan" required>
+                <option value="">-- Chọn bộ phận --</option>
+                <option value="Kỹ thuật">Kỹ thuật</option>
+                <option value="Kinh doanh">Kinh doanh</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Chuyên môn</label>
+              <input class="form-control" ng-model="ctrl.form.chuyen_mon">
+            </div>
+            <div class="form-group">
+              <label>Họ và tên</label>
+              <input class="form-control" ng-model="ctrl.form.ho_ten" required>
+            </div>
+            <div class="form-group">
+              <label>Thời gian bắt đầu</label>
+              <input type="date" class="form-control" ng-model="ctrl.form.tg_bat_dau">
+            </div>
+            <div class="form-group">
+              <label>Thời gian kết thúc</label>
+              <input type="date" class="form-control" ng-model="ctrl.form.tg_ket_thuc">
+            </div>
+            <div class="form-group">
+              <label>Ngày sinh</label>
+              <input type="date" class="form-control" ng-model="ctrl.form.ngay_sinh">
+            </div>
+            <div class="form-group">
+              <label>Điện thoại</label>
+              <input class="form-control" ng-model="ctrl.form.sdt" ng-pattern="/^[0-9]*$/">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" class="form-control" ng-model="ctrl.form.email" required>
+            </div>
+            <div class="form-group">
+              <label>Điểm tích lũy</label>
+              <input class="form-control" ng-model="ctrl.form.diem" ng-pattern="/^\d+(\.\d{1,2})?$/">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" ng-click="ctrl.save()" ng-disabled="internForm.$invalid">Lưu</button>
+          <button class="btn btn-info" ng-click="ctrl.saveAndContinue()" ng-disabled="internForm.$invalid">Lưu & Thêm</button>
+          <button class="btn btn-default" data-dismiss="modal">Hủy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+  <script>
+    angular.module('InternApp', [])
+      .filter('tel', function () {
+        return function (tel) {
+          if (!tel) return '';
+          tel = tel.toString().replace(/\D/g, '');
+          return '(' + tel.slice(0, 3) + ') ' + tel.slice(3, 6) + '-' + tel.slice(6);
+        };
+      })
+      .controller('InternController', function ($scope, $timeout) {
+        const self = this;
+
+        self.list = [
+          {
+            bo_phan: 'Kỹ thuật',
+            chuyen_mon: 'Lập trình web',
+            tg_bat_dau: new Date('2018-01-15'),
+            tg_ket_thuc: new Date('2018-03-31'),
+            ho_ten: 'Nguyễn A',
+            ngay_sinh: new Date('2018-01-15'),
+            sdt: '0123456789',
+            email: 'a@example.com',
+            diem: 85.75
+          }
+        ];
+
+        self.filteredList = angular.copy(self.list);
+
+        self.refresh = function () {
+          self.filteredList = angular.copy(self.list);
+        };
+
+        self.search = function () {
+          const keyword = self.searchText?.toLowerCase() || '';
+          self.filteredList = self.list.filter(nv =>
+            (nv.bo_phan?.toLowerCase().includes(keyword) ||
+             nv.chuyen_mon?.toLowerCase().includes(keyword) ||
+             nv.ho_ten?.toLowerCase().includes(keyword) ||
+             nv.email?.toLowerCase().includes(keyword))
+          );
+        };
+
+        self.checkEnter = function (e) {
+          if (e.keyCode === 13) self.search();
+        };
+
+        self.selectRow = function (nv) {
+          self.selected = nv;
+        };
+
+        self.addNew = function () {
+          self.isEdit = false;
+          self.form = {};
+          $('#formModal').modal('show');
+        };
+
+        self.editSelected = function () {
+          if (!self.selected) return;
+          self.isEdit = true;
+          self.form = angular.copy(self.selected);
+          $('#formModal').modal('show');
+        };
+
+        self.confirmDelete = function () {
+          if (confirm('Bạn có chắc muốn xoá bản ghi này?')) {
+            const index = self.list.indexOf(self.selected);
+            if (index > -1) {
+              self.list.splice(index, 1);
+              self.refresh();
+              self.selected = null;
+            }
+          }
+        };
+
+        self.save = function () {
+          if (self.isEdit) {
+            Object.assign(self.selected, self.form);
+          } else {
+            self.list.push(angular.copy(self.form));
+          }
+          $('#formModal').modal('hide');
+          self.refresh();
+        };
+
+        self.saveAndContinue = function () {
+          if (!self.isEdit) self.list.push(angular.copy(self.form));
+          self.form = {};
+          self.refresh();
+        };
+      });
+  </script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <div ng-app="myApp" ng-controller="MessageCtrl">
+      <input
+        type="text"
+        name="soDienThoai"
+        ng-model="form.so_dien_thoai"
+        ng-change="formatPhoneNumber()"
+        ng-pattern="/^\(\d{3}\) \d{3}-\d{4}$/"
+        class="form-control"
+        placeholder="(012) 345-6789"
+      />
+      <input
+        type="text"
+        name="soDienThoai"
+        ng-model="form.so_dien_thoai"
+        format-phone
+        class="form-control"
+        placeholder="(012) 345-6789"
+      />
+      <button ng-click="click()">jjjj</button>
+    </div>
+
+    <script>
+      var myApp = angular.module("myApp", []);
+
+      myApp.controller("MessageCtrl", function ($scope) {
+        $scope.showMessage = function (mes) {
+          alert(mes);
+        };
+        $scope.click = function(){
+          alert($scope.form.so_dien_thoai);
+        }
+        $scope.formatDiemTichLuy = function () {
+          let value = $scope.form.diem_tich_luy;
+          if (!value) return;
+
+          // Xóa ký tự không phải số hoặc dấu chấm
+          value = value.toString().replace(/[^0-9.]/g, "");
+
+          // Chỉ cho phép 1 dấu chấm
+          let parts = value.split(".");
+          if (parts.length > 2) parts = [parts[0], parts[1]];
+
+          let integerPart = parts[0].substring(0, 3); // Tối đa 3 số phần nguyên
+          let decimalPart = parts[1] ? parts[1].substring(0, 2) : "";
+
+          $scope.form.diem_tich_luy = decimalPart
+            ? integerPart + "." + decimalPart
+            : integerPart;
+        };
+
+        $scope.formatPhoneNumber = function () {
+          let raw = $scope.form.so_dien_thoai || "";
+          // Loại bỏ ký tự không phải số
+          raw = raw.replace(/\D/g, "");
+
+          if (raw.length > 10) raw = raw.substring(0, 10);
+
+          const area = raw.substring(0, 3);
+          const mid = raw.substring(3, 6);
+          const end = raw.substring(6, 10);
+
+          let formatted = "";
+          if (raw.length > 6) {
+            formatted = `(${area}) ${mid}-${end}`;
+          } else if (raw.length > 3) {
+            formatted = `(${area}) ${mid}`;
+          } else if (raw.length > 0) {
+            formatted = `(${area}`;
+          }
+
+          $scope.form.so_dien_thoai = formatted;
+        };
+      });
+
+      myApp.directive("message", function () {
+        return {
+          restrict: "E",
+          template:
+            '<input type="text" ng-model="message"/>' +
+            '<input type="button" value="Click" ng-click="show({m:message})" />',
+          scope: {
+            show: "&",
+          },
+        };
+      });
+      myApp.directive("formatPhone", function () {
+        return {
+          restrict: "A",
+          require: "ngModel",
+          link: function (scope, element, attrs, ngModelCtrl) {
+            function formatPhoneNumber(value) {
+              if (!value) return "";
+              let digits = value.replace(/\D/g, "").substring(0, 10);
+              let formatted = "";
+
+              if (digits.length > 6) {
+                formatted = `(${digits.slice(0, 3)}) ${digits.slice(
+                  3,
+                  6
+                )}-${digits.slice(6, 10)}`;
+              } else if (digits.length > 3) {
+                formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}`;
+              } else if (digits.length > 0) {
+                formatted = `(${digits}`;
+              }
+
+              return formatted;
+            }
+
+            ngModelCtrl.$parsers.push(function (value) {
+              const formatted = formatPhoneNumber(value);
+              ngModelCtrl.$setViewValue(formatted);
+              ngModelCtrl.$render();
+              return formatted;
+            });
+          },
+        };
+      });
+    </script>
+  </body>
+</html>

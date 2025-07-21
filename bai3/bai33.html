@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+
+    <title>Document</title>
+    <style>
+      .custom-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .infor {
+        background-color: #d1ecf1 !important;
+        font-weight: bold;
+      }
+      .custom-modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 600px;
+      }
+      .truncate {
+        display: inline-block;
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      button {
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div ng-app="QlttsApp" class="container">
+      <div ng-controller="QLlttsController" class="w-100">
+        <h3 class="text-center text-white bg-primary border border-success">
+          Quản lý thông tin thực tập sinh
+        </h3>
+        <div class="d-flex justify-content-between border border-success">
+          <p class="text-primary fs-4">Danh sách sinh viên thực tập</p>
+          <div>
+            <button ng-click="refresh();">
+              <i class="bi-arrow-clockwise text-primary"></i>
+            </button>
+            <button ng-click="openModal();">
+              <i class="bi bi-plus text-primary"></i>
+            </button>
+            <button ng-click="openEdit()">
+              <i class="bi bi-pencil text-primary"></i>
+            </button>
+            <button ng-click="deleteNv();">
+              <i class="bi bi-trash text-danger"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between border border-success">
+          <input
+            ng-model="searchKeyword"
+            placeholder="Nhap tu khoa tim kiem"
+            class="w-75 border-0 ouline-0"
+            ng-keypress="checkEnter($event)"
+          />
+          <div>
+            <button ng-click="search()" class="bg-primary">
+              <i class="bi text-white bi-search"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>Tổng số bản ghi: {{list.length}}</div>
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Hành động</th>
+              <th>Bộ phận</th>
+              <th>Chuyên môn</th>
+              <th>Thời gian tt</th>
+              <th>Họ và tên</th>
+              <th>Ngày sinh</th>
+              <th>Sđt</th>
+              <th>Email</th>
+              <th>Điểm tl</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              ng-repeat="nv in filteredList track by $index"
+              ng-click="selectRow(nv.id)"
+              ng-class="{'infor': selected===nv.id}"
+            >
+              <td>{{$index + 1}}</td>
+              <td>
+                <button ng-click="deleteNv(nv.id);$event.stopPropagation();">
+                  <i class="bi bi-trash text-danger"></i>
+                </button>
+              </td>
+              <td>{{nv.bo_phan}}</td>
+              <td title="{{nv.chuyen_mon}}">{{nv.chuyen_mon}}</td>
+              <td>
+                {{nv.tg_bat_dau | date :'dd/MM/yyyy'}} - {{nv.tg_ket_thuc | date
+                :'dd/MM/yyyy'}}
+              </td>
+              <td>
+                <span class="truncate" title="{{nv.ho_ten}}">
+                  {{nv.ho_ten}}
+                </span>
+              </td>
+              <td>{{nv.ngay_sinh | date:'dd/MM/yyyy'}}</td>
+              <td>{{nv.sdt | tel}}</td>
+              <td>{{nv.email}}</td>
+              <td>{{nv.diem | number:2}}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="custom-modal" ng-show="isModalVisible">
+          <div class="container custom-modal-content" id="formModal">
+            <h5 class="mb-3">Thêm thông tin nhân viên</h5>
+            <form name="staffForm" validate>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Bộ phận</label>
+                  <select class="form-select" ng-model="form.bo_phan">
+                    <option value="">-- Chọn bộ phận --</option>
+                    <option value="Kỹ thuật">Phòng Kỹ thuật</option>
+                    <option value="Nhân sự">Phòng Nhân sự</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Thời gian bắt đầu</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    ng-model="form.tg_bat_dau"
+                  />
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Chuyên môn</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    ng-model="form.chuyen_mon"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Thời gian kết thúc</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    ng-model="form.tg_ket_thuc"
+                  />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Họ và tên</label>
+                <input
+                  name="ho_ten"
+                  type="text"
+                  class="form-control"
+                  ng-model="form.ho_ten"
+                  required
+                />
+                <span
+                  style="color: red"
+                  ng-show="staffForm.ho_ten.$dirty && staffForm.ho_ten.$invalid"
+                  ><span ng-show="staffForm.ho_ten.$error.required"
+                    >Nhập họ tên.</span
+                  ></span
+                >
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Ngày sinh</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    ng-model="form.ngay_sinh"
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Điện thoại</label>
+                  <input type="text" class="form-control" ng-pattern="/^\(\d{3}\) \d{3}-\d{4}$/" ng-change="formatPhoneNumber()" ng-model="phoneNumberFormatted" />
+                </div>
+              </div>
+
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <label class="form-label">Email</label>
+                  <input
+                    type="email"
+                    ng-model="form.email"
+                    class="form-control"
+                    required
+                    name="email"
+                  />
+                  <span
+                    style="color: red"
+                    ng-show="staffForm.email.$dirty && staffForm.email.$invalid"
+                  >
+                    <span ng-show="staffForm.email.$error.required">
+                      Vui lòng nhập email.
+                    </span>
+                    <span ng-show="staffForm.email.$error.email">
+                      Địa chỉ email không hợp lệ (vd: ten@domain.com).
+                    </span>
+                  </span>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Điểm tích lũy</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    ng-model="form.diem"
+                    class="form-control"
+                  />
+                </div>
+              </div>
+
+              <div class="text-end">
+                <button
+                  ng-click="update()"
+                  type="submit"
+                  class="btn btn-primary"
+                >
+                  Lưu
+                </button>
+                <button
+                  ng-click="insert()"
+                  type="button"
+                  class="btn btn-secondary"
+                >
+                  Lưu & Thêm
+                </button>
+                <button
+                  ng-click="closeModal()"
+                  type="button"
+                  class="btn btn-light"
+                >
+                  Hủy
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- <div ng-include="'bai32.html'"></div> -->
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script>
+      var myApp = angular.module("QlttsApp", []);
+      myApp.filter("tel", function () {
+        return function (tel) {
+          if (!tel) return "";
+          return (
+            "(" + tel.slice(0, 3) + ") " + tel.slice(3, 6) + "-" + tel.slice(6)
+          );
+        };
+      });
+      myApp.controller("QLlttsController", function ($scope) {
+        $scope.list = [
+          {
+            id: 0,
+            bo_phan: "Kỹ thuật",
+            chuyen_mon: "Lập trình web",
+            tg_bat_dau: new Date("2018-01-15"),
+            tg_ket_thuc: new Date("2018-03-31"),
+            ho_ten: "Nguyễn B",
+            ngay_sinh: new Date("2003-01-15"),
+            sdt: "0123456789",
+            email: "a@example.com",
+            diem: 2.5,
+          },
+          {
+            id: 1,
+            bo_phan: "Kỹ thuật",
+            chuyen_mon: "Lập trình web",
+            tg_bat_dau: new Date("2018-01-15"),
+            tg_ket_thuc: new Date("2018-03-31"),
+            ho_ten:
+              "Nguyễn pHẠM vAEN jACK 97 192 nFHIA DZ Nguyễn pHẠM vAEN jACK 97 192 nFHIA DZ",
+            ngay_sinh: new Date("2003-01-15"),
+            sdt: "0123456789",
+            email: "a@example.com",
+            diem: 2.5,
+          },
+        ];
+        $scope.cur_id = 2;
+        $scope.filteredList = angular.copy($scope.list);
+        $scope.selectRow = function (nv) {
+          $scope.selected = nv;
+        };
+
+        $scope.refresh = function () {
+          $scope.filteredList = angular.copy($scope.list);
+        };
+        $scope.phoneNumberFormatted = ""; // Dữ liệu hiển thị trong input
+        $scope.phoneNumberRaw = ""; // Dữ liệu thô (chỉ số)
+
+        $scope.formatPhoneNumber = function () {
+          let rawInput = $scope.phoneNumberFormatted.replace(/\D/g, ""); // Loại bỏ tất cả ký tự không phải số
+
+          // Giới hạn chỉ 10 chữ số
+          if (rawInput.length > 10) {
+            rawInput = rawInput.substring(0, 10);
+          }
+
+          let formattedNumber = "";
+          if (rawInput.length > 0) {
+            if (rawInput.length > 6) {
+              formattedNumber =
+                "(" +
+                rawInput.substring(0, 3) +
+                ") " +
+                rawInput.substring(3, 6) +
+                "-" +
+                rawInput.substring(6, 10);
+            } else if (rawInput.length > 3) {
+              formattedNumber =
+                "(" +
+                rawInput.substring(0, 3) +
+                ") " +
+                rawInput.substring(3, 6);
+            } else {
+              formattedNumber = "(" + rawInput.substring(0, 3);
+            }
+          }
+
+          $scope.phoneNumberFormatted = formattedNumber;
+          $scope.phoneNumberRaw = rawInput; // Cập nhật dữ liệu thô
+        };
+        $scope.deleteNv = function (index) {
+          if (confirm("Xoa?")) {
+            if (index !== undefined && index !== null && index >= 0) {
+            } else index = $scope.selected;
+            if (index > -1) {
+              $scope.list = $scope.list.filter(function (item) {
+                return item.id !== index;
+              });
+              $scope.refresh();
+              $scope.selected = null;
+            }
+          }
+        };
+        $scope.isModalVisible = false;
+        $scope.openModal = function () {
+          $scope.isEdit = true;
+          $scope.form = {};
+          document.getElementById("formModal").style.display = "block";
+          $scope.isModalVisible = true;
+        };
+
+        $scope.closeModal = function () {
+          $scope.isModalVisible = false;
+          document.getElementById("formModal").style.display = "none";
+        };
+
+        $scope.insert = function () {
+          $scope.form.id = $scope.cur_id;
+          $scope.form.sdt = $scope.phoneNumberRaw;
+          $scope.list.push($scope.form);
+          $scope.cur_id++;
+          $scope.form = {};
+          $scope.refresh();
+        };
+
+        $scope.search = function () {
+          var keyword = $scope.searchKeyword.toLowerCase();
+          if (keyword.trim() == "") {
+            $scope.refresh();
+            return;
+          }
+          $scope.filteredList = $scope.list.filter(
+            (e) =>
+              e.bo_phan.toLowerCase().includes(keyword) ||
+              e.chuyen_mon.toLowerCase().includes(keyword) ||
+              e.ho_ten.toLowerCase().includes(keyword) ||
+              e.email.toLowerCase().includes(keyword)
+          );
+        };
+        $scope.checkEnter = function (e) {
+          if (e.keyCode === 13) $scope.search();
+        };
+        $scope.openEdit = function () {
+          if ($scope.selected < 0) return;
+          $scope.isEdit = true;
+          $scope.form = angular.copy($scope.list[$scope.selected]);
+          $scope.phoneNumberFormatted = $scope.form.sdt;
+          debugger
+          $scope.formatPhoneNumber(); 
+          document.getElementById("formModal").style.display = "block";
+          $scope.isModalVisible = true;
+        };
+
+        $scope.update = function () {
+          debugger;
+          let indexEdit = $scope.list.findIndex(function (item) {
+            return item.id == $scope.selected;
+          });
+          if (indexEdit !== -1) {
+            debugger;
+            $scope.list[indexEdit] = angular.copy($scope.form);
+            debugger;
+            $scope.refresh();
+            $scope.closeModal();
+          }
+        };
+      });
+    </script>
+  </body>
+</html>
