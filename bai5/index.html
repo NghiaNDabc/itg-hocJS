@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>Kế hoạch doanh số bán hàng</title>
+  </head>
+  <body ng-app="QlbhApp">
+    <div ng-controller="QlbhController">
+      <header class="itg-header">
+        <div class="logo">
+          <img
+            src="https://itgtechnology.vn/wp-content/uploads/2019/12/LOGO-3SERP-01.png"
+            alt=""
+          />
+        </div>
+
+        <div class="itg-toolbar d-flex justify-content-between">
+          <h3>Danh sách doanh số bán hàng</h3>
+          <div>
+            <button ng-click="refresh()">
+              <i class="bi-arrow-clockwise text-primary"></i>
+            </button>
+            <button ng-click="openModal()">
+              <i class="bi bi-plus text-primary"></i>
+            </button>
+            <button>
+              <button ng-click="openEdit()">
+                <i class="bi bi-pencil text-primary"></i>
+              </button>
+            </button>
+            <button ng-click="deleteRange()">
+              <i class="bi bi-trash text-danger"></i>
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="d-flex justify-content-between border border-success search"
+        >
+          <input
+            ng-model="searchKeyword"
+            placeholder="Nhập thông tin tìm kiếm"
+            class="border-0 ouline-0"
+            ng-keypress="checkEnter($event)"
+          />
+          <div></div>
+          <div>
+            <button style="background-color: white" ng-click="openFilter()">
+              <i class="bi bi-caret-down-fill"></i>
+            </button>
+            <button ng-click="search()">
+              <i class="bi text-white bi-search"></i>
+            </button>
+          </div>
+        </div>
+        <div class="dpnone align-items-center" id="filter">
+          <div >
+            <label for="filterLoaiKeHoach">
+              Loại kết hoạch
+              <select
+                id="filterLoaiKeHoach"
+                ng-model="filterLoaiKeHoach"
+                name="filterLoaiKeHoach"
+                class="form-select"
+                ng-change="search()"
+              >
+              <option value=""></option>
+                <option value="Kế hoạch tháng">Kế hoạch tháng</option>
+                <option value="Kế hoạch ngày">Kế hoạch ngày</option>
+              </select>
+            </label>
+          </div>
+          <div >
+            <label for="filterKieuThucHien">
+              Kiểu thực hiện
+              <select
+                id="filterKieuThucHien"
+                ng-model="filterKieuThucHien"
+                name="filterKieuThucHien"
+                class="form-select"
+                ng-change="search()"
+              >
+                <option value=""></option>
+                <option value="DS khách hàng">DS khách hàng</option>
+                <option value="DS nhân viên">DS nhân viên</option>
+              </select>
+            </label>
+          </div>
+          <div>
+            <label for="filterNam">
+              Năm
+              <br/>
+              <input id="filterNam" ng-model="filterNam" ng-keypress="checkEnter($event)" class="form-control"/>
+            </label>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div>Tổng số bản ghi:{{filteredList.length}}</div>
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Chọn</th>
+              <th>Sửa</th>
+              <th>Xóa</th>
+              <th>Năm</th>
+              <th>Loại kế hoạch</th>
+              <th>Kiểu thực hiện</th>
+              <th>Mã khách hàng</th>
+              <th>Tên khách hàng</th>
+              <th>DS tháng 1</th>
+              <th>DS tháng 2</th>
+              <th>DS tháng 3</th>
+              <th>DS tháng 4</th>
+              <th>DS tháng 5</th>
+              <th>DS tháng 6</th>
+              <th>DS tháng 7</th>
+              <th>DS tháng 8</th>
+              <th>DS tháng 9</th>
+              <th>DS tháng 10</th>
+              <th>DS tháng 11</th>
+              <th>DS tháng 12</th>
+              <th>Tổng doanh số</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              ng-repeat="item in filteredList track by $index"
+              ng-click="selectRow(item.id)"
+              ng-class="{'selected': selectedId==item.id}"
+            >
+              <td>{{$index +1}}</td>
+              <td><input ng-model="item.checked" type="checkbox" /></td>
+              <td>
+                <button ng-click="openEdit(item.id)">
+                  <i class="bi bi-pencil text-primary"></i>
+                </button>
+              </td>
+              <td>
+                <button ng-click="delete(item.id)">
+                  <i class="bi bi-trash text-danger"></i>
+                </button>
+              </td>
+              <td>{{item.nam}}</td>
+              <td>{{item.loai_ke_hoach}}</td>
+              <td>{{item.kieu_thuc_hien}}</td>
+              <td>{{item.ma_khach_hang}}</td>
+              <td>{{item.ten_khach_hang}}</td>
+              <td>{{item.ds_thang_1 |spaceNumber}}</td>
+              <td>{{item.ds_thang_2|spaceNumber}}</td>
+              <td>{{item.ds_thang_3 |spaceNumber}}</td>
+              <td>{{item.ds_thang_4 |spaceNumber}}</td>
+              <td>{{item.ds_thang_5 |spaceNumber}}</td>
+              <td>{{item.ds_thang_6 |spaceNumber}}</td>
+              <td>{{item.ds_thang_7 |spaceNumber}}</td>
+              <td>{{item.ds_thang_8 |spaceNumber}}</td>
+              <td>{{item.ds_thang_9 |spaceNumber}}</td>
+              <td>{{item.ds_thang_10 |spaceNumber}}</td>
+              <td>{{item.ds_thang_11 |spaceNumber}}</td>
+              <td>{{item.ds_thang_12 |spaceNumber}}</td>
+              <td>{{tinhTongDoanhSo(item) |spaceNumber}}</td>
+              <td>{{item.trang_thai}}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="custom-modal" id="formModal">
+          <div class="custom-modal-content">
+            <h5 class="text-center fw-bold">
+              Cập nhật kế hoạch doanh số khách hàng
+            </h5>
+            <form name="BanHangForm" novalidate>
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label class="form-label">Kiểu thực hiện</label>
+                  <select
+                    ng-model="form.kieu_thuc_hien"
+                    name="kieu_thuc_hien"
+                    class="form-select"
+                    required
+                  >
+                  <option></option>
+                    <option>DS khách hàng</option>
+                    <option>DS nhân viên</option>
+                  </select>
+                  <span
+                    style="color: red"
+                    ng-show="BanHangForm.kieu_thuc_hien.$dirty && BanHangForm.kieu_thuc_hien.$invalid"
+                    ><span ng-show="BanHangForm.kieu_thuc_hien.$error.required"
+                      >Chọn</span
+                    ></span
+                  >
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Năm</label>
+                  <input
+                    ng-model="form.nam"
+                    name="nam"
+                    type="text"
+                    class="form-control"
+                    value="2021"
+                    required
+                  />
+                  <span
+                    style="color: red"
+                    ng-show="BanHangForm.nam.$dirty && BanHangForm.nam.$invalid"
+                    ><span ng-show="BanHangForm.nam.$error.required"
+                      >Nhập năm</span
+                    ></span
+                  >
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Trạng thái</label>
+                  <select
+                    name="trang_thai"
+                    ng-model="form.trang_thai"
+                    class="form-select"
+                    required
+                  >
+                  <option></option>
+                    <option>Sử dụng</option>
+                    <option>Không sử dụng</option>
+                  </select>
+                  <span
+                    style="color: red"
+                    ng-show="BanHangForm.trang_thai.$dirty && BanHangForm.trang_thai.$invalid"
+                    ><span ng-show="BanHangForm.trang_thai.$error.required"
+                      >Nhập năm</span
+                    ></span
+                  >
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label class="form-label">Mã khách hàng</label>
+                  <input
+                    name="ma_khach_hang"
+                    ng-model="form.ma_khach_hang"
+                    type="text"
+                    class="form-control"
+                    required
+                  />
+                  <span
+                    style="color: red"
+                    ng-show="BanHangForm.ma_khach_hang.$dirty && BanHangForm.ma_khach_hang.$invalid"
+                    ><span ng-show="BanHangForm.ma_khach_hang.$error.required"
+                      >Nhập năm</span
+                    ></span
+                  >
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Tên khách hàng</label>
+                  <input
+                    name="ten_khach_hang"
+                    ng-model="form.ten_khach_hang"
+                    type="text"
+                    class="form-control"
+                    placeholder="Tên nhân viên"
+                    required
+                  />
+                  <span
+                    style="color: red"
+                    ng-show="BanHangForm.ten_khach_hang.$dirty && BanHangForm.ten_khach_hang.$invalid"
+                    ><span ng-show="BanHangForm.ten_khach_hang.$error.required"
+                      >Nhập năm</span
+                    ></span
+                  >
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Tổng DS</label>
+                  <input
+                    ng-model="tong_doanh_so"
+                    type="text"
+                    class="form-control bg-light"
+                    readonly
+                  />
+                </div>
+              </div>
+
+              <!-- Doanh số theo tháng -->
+              <div class="row">
+                <div class="col-md-4">
+                  <label class="form-label">DS tháng 1</label>
+                  <input
+                    name="ds_thang_1"
+                    ng-model="form.ds_thang_1"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 4</label>
+                  <input
+                    name="ds_thang_4"
+                    ng-model="form.ds_thang_4"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 7</label>
+                  <input
+                    name="ds_thang_7"
+                    ng-model="form.ds_thang_7"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 10</label>
+                  <input
+                    name="ds_thang_10"
+                    ng-model="form.ds_thang_10"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">DS tháng 2</label>
+                  <input
+                    name="ds_thang_2"
+                    ng-model="form.ds_thang_2"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 5</label>
+                  <input
+                    name="ds_thang_5"
+                    ng-model="form.ds_thang_5"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 8</label>
+                  <input
+                    name="ds_thang_8"
+                    ng-model="form.ds_thang_8"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 11</label>
+                  <input
+                    name="ds_thang_11"
+                    ng-model="form.ds_thang_11"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">DS tháng 3</label>
+                  <input
+                    name="ds_thang_3"
+                    ng-model="form.ds_thang_3"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 6</label>
+                  <input
+                    name="ds_thang_6"
+                    ng-model="form.ds_thang_6"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 9</label>
+                  <input
+                    name="ds_thang_9"
+                    ng-model="form.ds_thang_9"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                  <label class="form-label">DS tháng 12</label>
+                  <input
+                    name="ds_thang_12"
+                    ng-model="form.ds_thang_12"
+                    type="number"
+                    class="form-control mb-2"
+                    ng-change="capNhatTongDS()"
+                  />
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="text-end mt-4 p-3 bg-light border-top">
+                <button
+                  ng-click="save()"
+                  type="submit"
+                  style="background-color: #2b579a; color: white"
+                  class="btn me-2"
+                >
+                  Lưu
+                </button>
+                <button
+                  ng-click="insert()"
+                  type="button"
+                  style="background-color: #2b579a; color: white"
+                  class="btn me-2"
+                >
+                  Lưu và Thêm
+                </button>
+                <button ng-click="closeModal()" type="button" class="btn">
+                  Đóng
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="controller.js"></script>
+  </body>
+</html>
