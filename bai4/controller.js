@@ -116,6 +116,7 @@ myApp.controller("QlbhController", function ($scope,$filter) {
     $scope.refresh();
   };
   $scope.search = function () {
+    
     var keyword = $scope.searchKeyword.toLowerCase();
     if (keyword.trim() == "") {
       $scope.refresh();
@@ -150,7 +151,7 @@ myApp.controller("QlbhController", function ($scope,$filter) {
     return true;
   };
   $scope.insert = function () {
-    if (!$scope.check()) {
+    if (!$scope.check($scope.form)) {
       alert("Mỗi năm, mỗi loại kế hoạch chỉ có duy nhất 1 mã khách hàng");
       return;
     }
@@ -206,7 +207,7 @@ myApp.controller("QlbhController", function ($scope,$filter) {
       .toFixed(2) // 2 chữ số thập phân
       .replace(/\B(?=(\d{3})+(?!\d))/g, " "); // thêm khoảng trắng
   };
-  
+
   $scope.applyFormat = function (field) {
     let val = $scope.form[field];
     if (!val) return;
@@ -219,7 +220,6 @@ myApp.controller("QlbhController", function ($scope,$filter) {
     //   $scope.rawNumber[field] = number;
     }
   };
-   $scope.checkEnter = function (e) {
-          if (e.keyCode === 13) $scope.search();
-        };
+
+  
 });
