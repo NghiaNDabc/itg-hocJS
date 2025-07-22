@@ -9,7 +9,7 @@ myApp.filter("spaceNumber", function () {
   };
 });
 
-myApp.controller("QlbhController", function ($scope,$filter) {
+myApp.controller("QlbhController", function ($scope, $filter) {
   $scope.list = [
     {
       id: 1,
@@ -101,7 +101,7 @@ myApp.controller("QlbhController", function ($scope,$filter) {
     document.getElementById("formModal").style.display = "none";
   };
   $scope.deleteRange = function () {
-    if(!confirm("xoa?")) return;
+    if (!confirm("xoa?")) return;
     $scope.list = $scope.filteredList.filter(function (item) {
       return !item.checked;
     });
@@ -109,14 +109,13 @@ myApp.controller("QlbhController", function ($scope,$filter) {
   };
 
   $scope.delete = function (id) {
-    if(!confirm("xoa?")) return;
+    if (!confirm("xoa?")) return;
     $scope.list = $scope.filteredList.filter(function (item) {
       return item.id != id;
     });
     $scope.refresh();
   };
   $scope.search = function () {
-    
     var keyword = $scope.searchKeyword.toLowerCase();
     if (keyword.trim() == "") {
       $scope.refresh();
@@ -151,6 +150,10 @@ myApp.controller("QlbhController", function ($scope,$filter) {
     return true;
   };
   $scope.insert = function () {
+    if ($scope.BanHangForm.$invalid) {
+      alert("Vui lòng nhập đầy đủ và đúng thông tin!");
+      return;
+    }
     if (!$scope.check($scope.form)) {
       alert("Mỗi năm, mỗi loại kế hoạch chỉ có duy nhất 1 mã khách hàng");
       return;
@@ -217,9 +220,7 @@ myApp.controller("QlbhController", function ($scope,$filter) {
 
     if (!isNaN(number)) {
       $scope.form[field] = $filter("spaceNumber")(number);
-    //   $scope.rawNumber[field] = number;
+      //   $scope.rawNumber[field] = number;
     }
   };
-
-  
 });

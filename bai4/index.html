@@ -139,6 +139,7 @@
                     class="form-select"
                     required
                   >
+                  <option></option>
                     <option>DS khách hàng</option>
                     <option>DS nhân viên</option>
                   </select>
@@ -174,10 +175,19 @@
                     name="trang_thai"
                     ng-model="form.trang_thai"
                     class="form-select"
+                    required
                   >
+                  
+                  <option></option>
                     <option>Sử dụng</option>
                     <option>Không sử dụng</option>
                   </select>
+                  <span
+                    style="color: red"
+                    ng-show="BanHangForm.trang_thai.$dirty && BanHangForm.trang_thai.$invalid"
+                    ><span ng-show="BanHangForm.trang_thai.$error.required"
+                      >Nhập năm</span
+                    ></span>
                 </div>
               </div>
 
@@ -189,7 +199,15 @@
                     ng-model="form.ma_khach_hang"
                     type="text"
                     class="form-control"
+                    required
                   />
+                   <span
+                    style="color: red"
+                    ng-show="BanHangForm.ma_khach_hang.$dirty && BanHangForm.ma_khach_hang.$invalid"
+                    ><span ng-show="BanHangForm.ma_khach_hang.$error.required"
+                      >Nhập</span
+                    ></span
+                  >
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Tên khách hàng</label>
@@ -199,7 +217,14 @@
                     type="text"
                     class="form-control"
                     placeholder="Tên nhân viên"
-                  />
+                    required
+                  /><span
+                    style="color: red"
+                    ng-show="BanHangForm.ten_khach_hang.$dirty && BanHangForm.ten_khach_hang.$invalid"
+                    ><span ng-show="BanHangForm.ten_khach_hang.$error.required"
+                      >Nhập</span
+                    ></span
+                  >
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Tổng DS</label>
