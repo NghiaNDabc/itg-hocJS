@@ -49,6 +49,7 @@
             ng-model="searchKeyword"
             placeholder="Nhập thông tin tìm kiếm"
             class="border-0 ouline-0"
+            ng-keypress="checkEnter($event)"
           />
           <div>
             <button ng-click="search()">

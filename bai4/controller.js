@@ -206,7 +206,7 @@ myApp.controller("QlbhController", function ($scope,$filter) {
       .toFixed(2) // 2 chữ số thập phân
       .replace(/\B(?=(\d{3})+(?!\d))/g, " "); // thêm khoảng trắng
   };
-
+  
   $scope.applyFormat = function (field) {
     let val = $scope.form[field];
     if (!val) return;
@@ -219,4 +219,7 @@ myApp.controller("QlbhController", function ($scope,$filter) {
     //   $scope.rawNumber[field] = number;
     }
   };
+   $scope.checkEnter = function (e) {
+          if (e.keyCode === 13) $scope.search();
+        };
 });
